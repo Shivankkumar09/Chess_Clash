@@ -1,4 +1,4 @@
-# Real-Time Chess Game
+# CHESS CLASH
 
 This is a real-time chess game built using Node.js, Express, EJS, Socket.io, and Chess.js.
 
