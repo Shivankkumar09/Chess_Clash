@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chess Clash</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap');
+
+        *{
+            overflow: hidden;
+        }
+        body{
+            height: 100vh;
+            width:100vw;
+           background: #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #main{
+            background: #f7f6f6;
+            height :30vh;
+            width: 20vw;
+            border-radius: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index:99;
+        }
+
+       h1{
+ font-family: "Bebas Neue", sans-serif;
+  font-weight: 400;
+  font-size: 4em;
+  
+       }
+
+       button{
+        height: 6vh;
+        width: 7vw;
+        margin-bottom: 30px;
+        border-radius: 20px;
+         cursor:pointer;
+       }
+
+    </style>
+</head>
+<body>
+    
+    <div id="main">
+    <div id="head">
+        <h1>Chess Clash</h1>
+    </div>
+    <a href="/play"> <button>Play</button></a>
+    </div>
+</body>
+</html>

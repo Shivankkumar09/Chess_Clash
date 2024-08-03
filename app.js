@@ -17,11 +17,11 @@ app.set("view engine", "ejs");
 app.use(express.static(path.join(__dirname, "public")));
 
 app.get("/", (req, res) => {
-    res.render("index", { title: "Chess Game" });
+    res.render("mainp", { title: "Chess Game" });
 });
 
 app.get('/play', (req, res) => {
-    res.render('play'); 
+    res.render('index'); 
 });
 
 io.on("connection", (socket) => {
