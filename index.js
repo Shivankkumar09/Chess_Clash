@@ -12,6 +12,7 @@ const io = socket(server);
 const chess = new Chess();
 let players = {};
 let currentPlayer = "w";
+let gameReady = false;
 
 app.set("view engine", "ejs");
 app.use(express.static(path.join(__dirname, "public")));
@@ -37,16 +38,40 @@ io.on("connection", (socket) => {
         socket.emit("spectatorRole");
     }
 
+    // Check if both players have joined
+    if (players.white && players.black) {
+        gameReady = true;
+        io.emit("gameReady", true);
+        console.log("Both players joined! Game starting...");
+    } else {
+        socket.emit("waitingForPlayer", { white: !!players.white, black: !!players.black });
+    }
+
     socket.on("disconnect", () => {
         if (socket.id === players.white) {
             delete players.white;
+            gameReady = false;
+            io.emit("playerDisconnected", "white");
         } else if (socket.id === players.black) {
             delete players.black;
+            gameReady = false;
+            io.emit("playerDisconnected", "black");
+        }
+        
+        // Notify remaining players that game is paused
+        if (!gameReady && (players.white || players.black)) {
+            io.emit("waitingForPlayer", { white: !!players.white, black: !!players.black });
         }
     });
 
     socket.on("move", (move) => {
         try {
+            // Don't allow moves until both players have joined
+            if (!gameReady) {
+                socket.emit("gameNotReady");
+                return;
+            }
+
             if (chess.turn() === "w" && socket.id !== players.white) return;
             if (chess.turn() === "b" && socket.id !== players.black) return;
 

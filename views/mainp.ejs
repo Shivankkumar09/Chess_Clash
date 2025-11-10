@@ -4,8 +4,9 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Chess Clash</title>
+  <link rel="shortcut icon" href="knight.png" type="image/png">
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Poppins:wght@300;400;600;700&display=swap');
 
     * {
       margin: 0;
@@ -20,50 +21,237 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      font-family: "Bebas Neue", sans-serif;
+      font-family: "Poppins", sans-serif;
+      overflow: hidden;
+      position: relative;
+    }
+
+    body::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.3);
+      z-index: 0;
+    }
+
+    /* Animated background particles */
+    .chess-piece-bg {
+      position: absolute;
+      font-size: 80px;
+      opacity: 0.05;
+      animation: float 20s infinite ease-in-out;
+      z-index: 0;
+    }
+
+    .chess-piece-bg:nth-child(1) { top: 10%; left: 10%; animation-delay: 0s; }
+    .chess-piece-bg:nth-child(2) { top: 70%; left: 80%; animation-delay: 3s; }
+    .chess-piece-bg:nth-child(3) { top: 30%; left: 70%; animation-delay: 6s; }
+    .chess-piece-bg:nth-child(4) { top: 80%; left: 15%; animation-delay: 9s; }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0px) rotate(0deg); }
+      50% { transform: translateY(-30px) rotate(10deg); }
     }
 
     #main {
-      background: rgba(255, 255, 255, 0.9); /* translucent white */
-      height: 35vh;
-      width: 25vw;
-      border-radius: 20px;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(15px);
+      border: 2px solid rgba(255, 255, 255, 0.5);
+      padding: 60px 80px;
+      border-radius: 30px;
       display: flex;
       flex-direction: column;
       justify-content: center;
       align-items: center;
-      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
-      backdrop-filter: blur(10px);
+      box-shadow: 0 25px 70px rgba(0, 0, 0, 0.4),
+                  inset 0 1px 0 rgba(255, 255, 255, 0.8);
+      animation: slideIn 0.8s ease-out;
+      position: relative;
+      z-index: 1;
+      min-width: 450px;
+    }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateY(-50px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .logo-container {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      margin-bottom: 30px;
+    }
+
+    .chess-icon {
+      font-size: 60px;
+      animation: bounce 2s infinite;
+      filter: grayscale(0);
+    }
+
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
     }
 
     h1 {
-      font-size: 4em;
-      color: #000;
-      margin-bottom: 20px;
+      font-family: "Bebas Neue", sans-serif;
+      font-size: 5em;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 15px;
+      text-shadow: none;
+      letter-spacing: 3px;
+    }
+
+    .subtitle {
+      font-size: 1.1em;
+      color: #555;
+      margin-bottom: 40px;
+      font-weight: 400;
+      letter-spacing: 1px;
+    }
+
+    .button-container {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      width: 100%;
     }
 
     button {
-      height: 6vh;
-      width: 10vw;
-      border-radius: 20px;
+      padding: 18px 0;
+      width: 100%;
+      border-radius: 15px;
       border: none;
-      background-color: #333;
-      color: #fff;
+      font-family: "Poppins", sans-serif;
       font-size: 1.2em;
+      font-weight: 600;
       cursor: pointer;
       transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+      letter-spacing: 1px;
     }
 
-    button:hover {
-      background-color: #555;
+    .play-btn {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: #fff;
+      box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+    }
+
+    .play-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 12px 30px rgba(102, 126, 234, 0.6);
+    }
+
+    .play-btn:active {
+      transform: translateY(-1px);
+    }
+
+    .play-btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+      transition: left 0.5s;
+    }
+
+    .play-btn:hover::before {
+      left: 100%;
+    }
+
+    .features {
+      margin-top: 30px;
+      display: flex;
+      gap: 25px;
+      color: #666;
+      font-size: 0.9em;
+    }
+
+    .feature {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .feature-icon {
+      font-size: 1.3em;
+    }
+
+    @media (max-width: 768px) {
+      #main {
+        padding: 40px 50px;
+        min-width: 90vw;
+      }
+
+      h1 {
+        font-size: 3.5em;
+      }
+
+      .subtitle {
+        font-size: 1em;
+      }
+
+      button {
+        font-size: 1.1em;
+      }
+
+      .features {
+        flex-direction: column;
+        gap: 10px;
+      }
     }
   </style>
 </head>
 <body>
+  <!-- Animated background chess pieces -->
+  <div class="chess-piece-bg">♔</div>
+  <div class="chess-piece-bg">♞</div>
+  <div class="chess-piece-bg">♜</div>
+  <div class="chess-piece-bg">♛</div>
 
   <div id="main">
+    <div class="logo-container">
+      <span class="chess-icon">♔</span>
+    </div>
     <h1>Chess Clash</h1>
-    <a href="/play"><button>Play</button></a>
+    <p class="subtitle">Master the Game. Own the Board.</p>
+    
+    <div class="button-container">
+      <a href="/play" style="text-decoration: none; width: 100%;">
+        <button class="play-btn">Start Playing</button>
+      </a>
+    </div>
+
+    <div class="features">
+      <div class="feature">
+        <span class="feature-icon">⚡</span>
+        <span>Real-time Multiplayer</span>
+      </div>
+      <div class="feature">
+        <span class="feature-icon">🎮</span>
+        <span>Instant Matchmaking</span>
+      </div>
+      <div class="feature">
+        <span class="feature-icon">🔊</span>
+        <span>Sound Effects</span>
+      </div>
+    </div>
   </div>
 
 </body>

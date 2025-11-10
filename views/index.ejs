@@ -3,93 +3,667 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chess_Game</title>
+    <title>Chess Clash - Game</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #1e1e2e 0%, #2d2d44 100%);
+            overflow: hidden;
+        }
+
+        .game-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            gap: 30px;
+            padding: 20px;
+        }
+
+        .left-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            min-width: 280px;
+        }
+
+        .player-panel {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 20px;
+            color: white;
+            transition: all 0.3s ease;
+        }
+
+        .player-panel.active {
+            background: rgba(102, 126, 234, 0.15);
+            border-color: rgba(102, 126, 234, 0.5);
+            box-shadow: 0 0 30px rgba(102, 126, 234, 0.3);
+        }
+
+        .player-name {
+            font-size: 1.3em;
+            font-weight: 600;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .player-icon {
+            font-size: 1.5em;
+        }
+
+        .captured-pieces {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            min-height: 40px;
+            margin-top: 10px;
+        }
+
+        .captured-piece {
+            font-size: 24px;
+            opacity: 0.7;
+            animation: captureAnimation 0.3s ease-out;
+        }
+
+        @keyframes captureAnimation {
+            from {
+                transform: scale(0) rotate(180deg);
+                opacity: 0;
+            }
+            to {
+                transform: scale(1) rotate(0deg);
+                opacity: 0.7;
+            }
+        }
+
+        .board-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .board-wrapper {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(15px);
+            border: 2px solid rgba(255, 255, 255, 0.15);
+            border-radius: 20px;
+            padding: 50px 40px 40px 50px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+            position: relative;
+        }
+
+        .board-with-coords {
+            position: relative;
+            display: inline-block;
+        }
+
         .chessboard {
             display: grid;
             grid-template-columns: repeat(8, minmax(0, 1fr));
             grid-template-rows: repeat(8, minmax(0, 1fr));
-            width: 400px;
-            height: 400px;
+            width: 560px;
+            height: 560px;
             transform: rotate(0deg);
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
         }
 
-        .piece.white {
-            color: white;
-            filter: drop-shadow(0 0 2px rgba(0, 0, 0, 1));
+        .coordinates {
+            position: absolute;
+            color: #fff;
+            font-size: 16px;
+            font-weight: 700;
+            user-select: none;
+            font-family: 'Poppins', sans-serif;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+            z-index: 10;
         }
 
-        .piece.black {
-            color: black;
+        .coord-row {
+            left: -55px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            height: 560px;
+            top: 0;
+            padding: 0;
         }
 
-        .flipped {
-            transform: rotate(180deg);
+        .coord-col {
+            bottom: -55px;
+            display: flex;
+            justify-content: space-between;
+            width: 560px;
+            left: 0;
+            padding: 0;
+        }
+
+        .coord-label {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 70px;
+            height: 70px;
+        }
+
+        .flipped-coords .coord-row {
+            flex-direction: column-reverse;
+        }
+
+        .flipped-coords .coord-col {
+            flex-direction: row-reverse;
         }
 
         .square {
             display: flex;
             align-items: center;
             justify-content: center;
+            position: relative;
+            transition: background-color 0.2s ease;
         }
 
         .square.light {
-            background-color: #f0d9b5;
+            background-color: #eeeed2;
         }
 
         .square.dark {
-            background-color: #b58863;
+            background-color: #769656;
+        }
+
+        .square:hover {
+            filter: brightness(1.1);
+        }
+
+        .square.selected {
+            background-color: #f6f669 !important;
+            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .square.last-move {
+            background-color: rgba(255, 255, 100, 0.4);
         }
 
         .piece {
-            font-size: 36px;
+            font-size: 48px;
             cursor: pointer;
+            transition: transform 0.2s ease;
+            user-select: none;
+        }
+
+        .piece.white {
+            color: #ffffff;
+            filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.8));
+        }
+
+        .piece.black {
+            color: #000000;
+            filter: drop-shadow(0 2px 3px rgba(255, 255, 255, 0.3));
         }
 
         .piece.draggable {
             cursor: grab;
         }
 
+        .piece.draggable:hover {
+            transform: scale(1.1);
+        }
+
+        .piece.draggable:active {
+            cursor: grabbing;
+        }
+
         .dragging {
             opacity: 0.5;
         }
         
+        .flipped {
+            transform: rotate(180deg);
+        }
        
         .flipped .piece {
             transform: rotate(180deg);
         }
 
         .dot {
-            width: 15px;
-            height: 15px;
+            width: 20px;
+            height: 20px;
             border-radius: 50%;
-            background-color: rgba(0, 0, 0, 0.5);
-            position: relative;
+            background-color: rgba(0, 0, 0, 0.3);
+            position: absolute;
+            pointer-events: none;
+            animation: dotPulse 1s infinite;
+        }
+
+        @keyframes dotPulse {
+            0%, 100% { transform: scale(1); opacity: 0.3; }
+            50% { transform: scale(1.2); opacity: 0.5; }
         }
     
         .highlight {
             position: relative;
         }
+
+        .right-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            min-width: 280px;
+            max-height: 80vh;
+        }
+
+        .info-panel {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 20px;
+            color: white;
+        }
+
+        .panel-title {
+            font-size: 1.2em;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #667eea;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: 600;
+            margin-top: 10px;
+        }
+
+        .status-badge.player {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .status-badge.spectator {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .move-history {
+            max-height: 400px;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+
+        .move-history::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .move-history::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+        }
+
+        .move-history::-webkit-scrollbar-thumb {
+            background: rgba(102, 126, 234, 0.5);
+            border-radius: 10px;
+        }
+
+        .move-item {
+            display: grid;
+            grid-template-columns: 40px 1fr 1fr;
+            gap: 10px;
+            padding: 8px;
+            margin-bottom: 5px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 8px;
+            font-size: 0.9em;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .move-number {
+            color: #667eea;
+            font-weight: 600;
+        }
+
+        .timer {
+            font-size: 2em;
+            font-weight: 700;
+            text-align: center;
+            font-family: 'Courier New', monospace;
+            margin-top: 5px;
+        }
+
+        .game-info {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            font-size: 0.9em;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 8px;
+        }
+
+        .info-label {
+            opacity: 0.7;
+        }
+
+        .info-value {
+            font-weight: 600;
+        }
+
+        @media (max-width: 1400px) {
+            .game-container {
+                flex-direction: column;
+                overflow-y: auto;
+                height: auto;
+                min-height: 100vh;
+            }
+
+            .left-panel, .right-panel {
+                flex-direction: row;
+                min-width: auto;
+                width: 100%;
+                max-width: 600px;
+            }
+
+            .chessboard {
+                width: 400px;
+                height: 400px;
+            }
+
+            .piece {
+                font-size: 36px;
+            }
+
+            .board-wrapper {
+                padding: 40px 30px 30px 40px;
+            }
+
+            .coord-row {
+                height: 400px;
+                left: -30px;
+                font-size: 14px;
+            }
+
+            .coord-col {
+                width: 400px;
+                bottom: -25px;
+                font-size: 14px;
+            }
+
+            .coord-label {
+                width: 50px;
+                height: 50px;
+            }
+            
+            .board-wrapper {
+                padding: 40px 30px 30px 40px;
+            }
+        }
+
+        /* Waiting Overlay */
+        .waiting-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(10px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        .waiting-overlay.hidden {
+            display: none;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .waiting-content {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 30px;
+            padding: 50px 70px;
+            text-align: center;
+            color: white;
+            animation: slideUp 0.5s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .waiting-title {
+            font-size: 2em;
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: #667eea;
+        }
+
+        .waiting-message {
+            font-size: 1.2em;
+            margin-bottom: 30px;
+            opacity: 0.9;
+        }
+
+        .spinner {
+            width: 60px;
+            height: 60px;
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .player-status {
+            display: flex;
+            gap: 30px;
+            justify-content: center;
+            margin-top: 30px;
+        }
+
+        .player-slot {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .player-slot-icon {
+            font-size: 40px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 50%;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            width: 80px;
+            height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .player-slot.joined .player-slot-icon {
+            background: rgba(102, 126, 234, 0.3);
+            border-color: #667eea;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(102, 126, 234, 0.7); }
+            50% { transform: scale(1.05); box-shadow: 0 0 20px 10px rgba(102, 126, 234, 0); }
+        }
+
+        .player-slot-label {
+            font-size: 1em;
+            font-weight: 600;
+            opacity: 0.7;
+        }
+
+        .player-slot.joined .player-slot-label {
+            opacity: 1;
+            color: #667eea;
+        }
     </style>
     <link rel="shortcut icon" href="knight.png" type="image/png">
 </head>
 <body>
-   
-    <div class="w-full h-screen bg-zinc-900 flex justify-center items-center">
-        <div class="flex flex-col items-center">
-            <div class="chessboard w-[32rem] h-[32rem] mt-24 bg-red-400"></div>
-            <div id="turnIndicator" class="text-white mt-4">Current Turn: White</div>
+    <!-- Waiting Overlay -->
+    <div id="waitingOverlay" class="waiting-overlay">
+        <div class="waiting-content">
+            <div class="waiting-title">⏳ Waiting for Players</div>
+            <div class="spinner"></div>
+            <div class="waiting-message" id="waitingMessage">Waiting for opponent to join...</div>
+            <div class="player-status">
+                <div class="player-slot" id="whiteSlot">
+                    <div class="player-slot-icon">♔</div>
+                    <div class="player-slot-label">White Player</div>
+                </div>
+                <div class="player-slot" id="blackSlot">
+                    <div class="player-slot-icon">♚</div>
+                    <div class="player-slot-label">Black Player</div>
+                </div>
+            </div>
         </div>
     </div>
 
+    <div class="game-container">
+        <!-- Left Panel -->
+        <div class="left-panel">
+            <div id="blackPlayerPanel" class="player-panel">
+                <div class="player-name">
+                    <span class="player-icon">♚</span>
+                    <span>Black Player</span>
+                </div>
+                <div class="captured-pieces" id="blackCaptured"></div>
+            </div>
+        </div>
+
+        <!-- Board Container -->
+        <div class="board-container">
+            <div class="board-wrapper">
+                <div class="board-with-coords" id="boardWithCoords">
+                    <!-- Row coordinates (1-8) -->
+                    <div class="coordinates coord-row">
+                        <div class="coord-label">8</div>
+                        <div class="coord-label">7</div>
+                        <div class="coord-label">6</div>
+                        <div class="coord-label">5</div>
+                        <div class="coord-label">4</div>
+                        <div class="coord-label">3</div>
+                        <div class="coord-label">2</div>
+                        <div class="coord-label">1</div>
+                    </div>
+                    
+                    <!-- Column coordinates (a-h) -->
+                    <div class="coordinates coord-col">
+                        <div class="coord-label">a</div>
+                        <div class="coord-label">b</div>
+                        <div class="coord-label">c</div>
+                        <div class="coord-label">d</div>
+                        <div class="coord-label">e</div>
+                        <div class="coord-label">f</div>
+                        <div class="coord-label">g</div>
+                        <div class="coord-label">h</div>
+                    </div>
+                    
+                    <div class="chessboard"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Panel -->
+        <div class="right-panel">
+            <div id="whitePlayerPanel" class="player-panel active">
+                <div class="player-name">
+                    <span class="player-icon">♔</span>
+                    <span>White Player</span>
+                </div>
+                <div class="captured-pieces" id="whiteCaptured"></div>
+            </div>
+
+            <div class="info-panel">
+                <div class="panel-title">Game Info</div>
+                <div class="game-info">
+                    <div class="info-row">
+                        <span class="info-label">Your Role:</span>
+                        <span class="info-value" id="playerRoleDisplay">Waiting...</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Current Turn:</span>
+                        <span class="info-value" id="currentTurnDisplay">White</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Moves:</span>
+                        <span class="info-value" id="moveCount">0</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="info-panel">
+                <div class="panel-title">Move History</div>
+                <div class="move-history" id="moveHistory">
+                    <div style="opacity: 0.5; text-align: center; padding: 20px;">
+                        No moves yet
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <audio id="move-self" src="/sounds/move-self.mp3"></audio>
     <audio id="capture" src="/sounds/capture.mp3"></audio>
     <audio id="notify" src="/sounds/notify.mp3"></audio>
     <audio id="invalid" src="/sounds/invalid.mp3"></audio>
-   
 
     <script src="https://cdn.socket.io/3.1.3/socket.io.min.js" integrity="sha384-cPwlPLvBTa3sKAgddT6krw0cJat7egBga3DJepJyrLl4Q9/5WLra3rrnMcyTyOnh" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js" integrity="sha512-xRllwz2gdZciIB+AkEbeq+gVhX8VB8XsfqeFbUh+SzHlN96dEduwtTuVuc2u9EROlmW9+yhRlxjif66ORpsgVA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
